@@ -1,10 +1,3 @@
-declare global {
-    interface Window {
-        NDEFReader: any,
-        NDEFWriter: any
-    }
-}
-
 interface writeNfcTagProps {
     write: string,
     onSuccess: () => void,
@@ -13,10 +6,10 @@ interface writeNfcTagProps {
 
 export const writeNfcTag = (props: writeNfcTagProps) => {
     if ("NDEFReader" in window) {
-        const ndef = new window.NDEFWriter();
+        const ndef = new NDEFReader();
         ndef.write(props.write)
             .then(() => props.onSuccess())
-            .catch((error: any) => props.onError(`${error}`));
+            .catch((error) => props.onError(`${error}`));
     } else {
         props.onError("Web NFC is not supported.");
     }
@@ -29,18 +22,18 @@ interface readNfcTagProps {
 
 export const readNfcTag = (props: readNfcTagProps) => {
     if ("NDEFReader" in window) {
-        const ndef = new window.NDEFReader();
+        const ndef = new NDEFReader();
         ndef.scan().then(() => {
             ndef.onreadingerror = () => {
                 props.onError("Cannot read data from the NFC tag.");
             };
-            ndef.onreading = (event: any) => {
+            ndef.onreading = (event) => {
                 const decoder = new TextDecoder();
                 for (const record of event.message.records) {
                     props.onSuccess(decoder.decode(record.data));
                 }
             };
-        }).catch((error: any) => {
+        }).catch((error) => {
             props.onError(`Error! Scan failed to start: ${error}.`);
         });
     } else {
